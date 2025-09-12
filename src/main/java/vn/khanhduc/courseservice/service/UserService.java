@@ -1,6 +1,8 @@
 package vn.khanhduc.courseservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.khanhduc.courseservice.dto.request.CreateUserRequest;
 import vn.khanhduc.courseservice.dto.response.CreateUserResponse;
@@ -21,7 +23,9 @@ public class UserService {
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setUsername(request.getUsername());
 
         userRepository.save(user);
