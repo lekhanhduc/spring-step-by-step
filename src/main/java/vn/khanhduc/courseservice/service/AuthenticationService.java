@@ -1,37 +1,35 @@
 package vn.khanhduc.courseservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import vn.khanhduc.courseservice.dto.request.LoginRequest;
 import vn.khanhduc.courseservice.dto.response.LoginResponse;
 import vn.khanhduc.courseservice.entity.User;
-import vn.khanhduc.courseservice.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     public LoginResponse login(LoginRequest request) {
-        String email = request.getEmail();
-        String password = request.getPassword();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        String passwordHash = user.getPassword();
-        PasswordEncoder  passwordEncoder = new BCryptPasswordEncoder();
+        UsernamePasswordAuthenticationToken authenticationRequest = new UsernamePasswordAuthenticationToken(request.email(), request.password());
 
-        if(!passwordEncoder.matches(password, passwordHash)){
-            throw new RuntimeException("Incorrect password");
-        }
+        Authentication authenticate = authenticationManager.authenticate(authenticationRequest);
 
-        // tạo token
+        User user = (User) authenticate.getPrincipal();
+
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
         return LoginResponse.builder()
-                .token("Token123456")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

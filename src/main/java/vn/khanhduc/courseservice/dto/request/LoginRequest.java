@@ -1,9 +1,5 @@
 package vn.khanhduc.courseservice.dto.request;
 
-import lombok.Getter;
+public record LoginRequest(String email, String password) {
 
-@Getter
-public class LoginRequest {
-    private String email;
-    private String password;
 }
