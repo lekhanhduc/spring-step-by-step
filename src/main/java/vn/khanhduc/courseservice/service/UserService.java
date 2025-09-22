@@ -1,6 +1,7 @@
 package vn.khanhduc.courseservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import vn.khanhduc.courseservice.dto.request.CreateUserRequest;
 import vn.khanhduc.courseservice.dto.response.CreateUserResponse;
 import vn.khanhduc.courseservice.entity.User;
 import vn.khanhduc.courseservice.repository.UserRepository;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,11 @@ public class UserService {
                 .email(request.getEmail())
                 .username(request.getUsername())
                 .build();
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
 }

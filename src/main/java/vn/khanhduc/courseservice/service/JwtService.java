@@ -3,15 +3,18 @@ package vn.khanhduc.courseservice.service;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import vn.khanhduc.courseservice.entity.User;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
 
-    private String secretKey = "eqS5fqwmlhALPxmsrbNZOX8/INdAm9RQcaT9brFuk3VOMRrj1ITddcm+QwSWVLhP4arkHnya6naMKSNVUiPJb0p+0SjhkKKmXPTuJtsL96w=";
+    @Value("${jwt.secret-key}")
+    private String secretKey;
 
     public String generateAccessToken(User user) {
         // 1. Header
@@ -25,11 +28,12 @@ public class JwtService {
                 .issueTime(issueTime)
                 .expirationTime(new Date(issueTime.toInstant().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
                 .claim("id", user.getId())
+                .jwtID(UUID.randomUUID().toString())
                 .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());
         // 3. Chữ kí
-        JWSObject jwsObject = new  JWSObject(header, payload);
+        JWSObject jwsObject = new JWSObject(header, payload);
         try {
             jwsObject.sign(new MACSigner(secretKey));
         } catch (JOSEException e) {
@@ -51,6 +55,7 @@ public class JwtService {
                 .issueTime(issueTime)
                 .expirationTime(new Date(issueTime.toInstant().plus(14, ChronoUnit.DAYS).toEpochMilli()))
                 .claim("id", user.getId())
+                .jwtID(UUID.randomUUID().toString())
                 .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());
