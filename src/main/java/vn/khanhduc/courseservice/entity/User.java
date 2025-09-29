@@ -6,8 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import vn.khanhduc.courseservice.common.UserStatus;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,15 +24,34 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String username;
 
+    @Column(unique = true)
     private String email;
 
     private String password;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserHasRole>  userHasRoles;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
+    public void addRole(Role role){
+        this.userHasRoles = List.of(
+                UserHasRole.builder()
+                        .user(this)
+                        .role(role)
+                        .build()
+        );
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return this.userHasRoles.stream()
+                .map(userHasRole -> new SimpleGrantedAuthority(userHasRole.getRole().getName()))
+                .toList();
     }
 
     @Override
@@ -51,7 +71,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return this.status == UserStatus.ACTIVE;
     }
 
 }
