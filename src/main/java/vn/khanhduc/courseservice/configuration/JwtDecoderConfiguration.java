@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 import vn.khanhduc.courseservice.entity.Token;
-import vn.khanhduc.courseservice.repository.TokenRepository;
+import vn.khanhduc.courseservice.repository.RedisTokenRepository;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.text.ParseException;
@@ -26,7 +26,7 @@ public class JwtDecoderConfiguration implements JwtDecoder {
     @Value("${jwt.secret-key}")
     private String secretKey;
 
-    private final TokenRepository tokenRepository;
+    private final RedisTokenRepository redisTokenRepository;
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
@@ -43,7 +43,7 @@ public class JwtDecoderConfiguration implements JwtDecoder {
 
             // Kiểm tra token đã bị logout chưa ?
             String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
-            Optional<Token> tokenOptional = tokenRepository.findById(jwtId);
+            Optional<Token> tokenOptional = redisTokenRepository.findById(jwtId);
             if(tokenOptional.isPresent()) {
                 // nếu tồn tại --> đã logout
                 log.info("Token is logged");

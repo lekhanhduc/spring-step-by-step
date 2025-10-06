@@ -1,20 +1,22 @@
 package vn.khanhduc.courseservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
+import java.util.concurrent.TimeUnit;
 
-@Entity
-@Table(name = "tokens")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@RedisHash("RedisToken")
 public class Token {
 
     @Id
     private String tokenId;
 
+    @TimeToLive(unit = TimeUnit.MINUTES)
+    private Long expiredTime;
 }
